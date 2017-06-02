@@ -9,7 +9,7 @@ Description:    The errors that can be thrown by this library
 */
 
 /// Errors that occur in the CLI
-enum ArgumentError: Error {
+public enum ArgumentError: Error {
     case conversionError(String)
     case emptyString
     case requiredArgumentNotSet(String)
