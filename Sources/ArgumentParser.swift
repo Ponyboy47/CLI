@@ -113,7 +113,7 @@ public class ArgumentParser {
         // Go over all the single character arguments (preceded by a single hyphen)
         for arg in cli.filter({ $0.starts(with: "-") && !$0.starts(with: "--") }) {
             // Get rid of the hyphen and return the remaining characters
-            var argChars = arg.dropFirst().characters
+            let argChars = arg.dropFirst().characters
             // Look for the argument in the array, else return nil
             guard let _ = argChars.index(of: shortName) else { continue }
             // Make sure it's not a bool, or else just return true
