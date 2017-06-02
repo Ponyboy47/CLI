@@ -1,8 +1,10 @@
 /*
 
-Author:     Jacob Williams
-Date:       05/30/2017
-License:    MIT
+File:           ArgumentTypes.swift
+Author:         Jacob Williams
+Date:           05/30/2017
+License:        MIT
+Description:    Extensions for cli argument types
 
 */
 

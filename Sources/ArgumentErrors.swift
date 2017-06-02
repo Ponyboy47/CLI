@@ -1,8 +1,10 @@
 /*
 
-Author:     Jacob Williams
-Date:       05/30/2017
-License:    MIT
+File:           ArgumentErrors.swift
+Author:         Jacob Williams
+Date:           05/30/2017
+License:        MIT
+Description:    The errors that can be thrown by this library
 
 */
 

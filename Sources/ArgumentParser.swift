@@ -1,8 +1,10 @@
 /*
 
-Author:     Jacob Williams
-Date:       05/30/2017
-License:    MIT
+File:           ArgumentParser.swift
+Author:         Jacob Williams
+Date:           05/30/2017
+License:        MIT
+Description:    The parser struct that reads the cli for data
 
 */
 
