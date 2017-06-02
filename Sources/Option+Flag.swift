@@ -14,19 +14,19 @@ import Strings
 /// CLI Arguments that come with a value
 public struct Option<A: ArgumentType>: ArgumentValue {
     typealias ArgType = A
-    var mainName: String
-    var alternateNames: [String]?
-    var `default`: A?
-    var description: String?
-    var `required`: Bool
-    var type: A.Type {
+    public var mainName: String
+    public var alternateNames: [String]?
+    public var `default`: A?
+    public var description: String?
+    public var `required`: Bool
+    public var type: A.Type {
         return A.self
     }
-    var value: A?
-    var usageDescriptionActualLength: Int = 0
-    var usageDescriptionNiceLength: Int = 0
+    public var value: A?
+    public var usageDescriptionActualLength: Int = 0
+    public var usageDescriptionNiceLength: Int = 0
 
-    init(_ mainName: String, alternateNames: [String]? = nil, `default`: A? = nil, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
+    public init(_ mainName: String, alternateNames: [String]? = nil, `default`: A? = nil, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
         let reserved = ["h", "help", "v", "version"]
         let mainName = mainName.lowercased().lstrip("-")
         let alternateNames = alternateNames?.map { $0.lowercased().lstrip("-") }
@@ -64,7 +64,7 @@ public struct Option<A: ArgumentType>: ArgumentValue {
         parser.arguments.append(self)
     }
 
-    mutating func usage() -> String {
+    public mutating func usage() -> String {
         var u = "\t-"
         if mainName.length > 1 {
             u += "-"
@@ -99,7 +99,7 @@ public struct Option<A: ArgumentType>: ArgumentValue {
         return u
     }
 
-    mutating func parse() throws {
+    public mutating func parse() throws {
         // Try and get the string value of the argument from the cli
         if let stringValue = ArgumentParser.parse(self) {
             // Try and convert that string value to the proper type
