@@ -13,13 +13,13 @@ public struct ArgumentParser {
     var usage: String
     var arguments: [Argument] = []
 
-    lazy var shortNames: [String] = {
+    public lazy var shortNames: [String] = {
         return self.allNames.filter { $0.characters.count == 1 }
     }()
-    lazy var longNames: [String] = {
+    public lazy var longNames: [String] = {
         return self.allNames.filter { $0.characters.count > 1 }
     }()
-    lazy var allNames: [String] = {
+    public lazy var allNames: [String] = {
         var aNames: [String] = []
         for arg in self.arguments {
             aNames.append(arg.mainName)
@@ -30,11 +30,11 @@ public struct ArgumentParser {
         return aNames
     }()
 
-    init(_ usage: String) {
+    public init(_ usage: String) {
         self.usage = usage
     }
 
-    static var needsHelp: Bool = {
+    public static var needsHelp: Bool = {
         var h: Bool = false
         do {
             if let help = ArgumentParser.parse(longName: "help", isBool: true) {
@@ -48,7 +48,7 @@ public struct ArgumentParser {
         return h
     }()
 
-    static var wantsVersion: Bool = {
+    public static var wantsVersion: Bool = {
         var v: Bool = false
         do {
             if let version = ArgumentParser.parse(longName: "version", isBool: true) {
@@ -63,14 +63,14 @@ public struct ArgumentParser {
     }()
 
     /// Parse all the arguments and set their values
-    func parse() throws {
+    public func parse() throws {
         for var arg in arguments {
             try arg.parse()
         }
     }
 
     /// Parse for a specific Argument and returns it's string value if it finds one
-    static func parse<A: ArgumentValue>(_ argument: A) -> String? {
+    public static func parse<A: ArgumentValue>(_ argument: A) -> String? {
         let isBool = argument.type is Bool.Type
         if argument.mainName.length > 1 {
             if let value = ArgumentParser.parse(longName: argument.mainName, isBool: isBool) {
@@ -167,7 +167,7 @@ public struct ArgumentParser {
     }
 
     /// Prints the usage text for all of the arguments included in the parser
-    func printHelp() {
+    public func printHelp() {
         print("Usage: \(usage)\n\nOptions:")
         // Get the length of the longest usage description so that we can
         // format everything nicely
