@@ -29,7 +29,7 @@ protocol Argument {
     /// The usage string for cli argument
     mutating func usage() -> String
     /// Parses the cli arguments to get the string value of the argument, or nil if it is not set
-    mutating func parse() throws
+    mutating func parse(_ cli: inout [String]) throws
 }
 
 
@@ -55,8 +55,6 @@ protocol ArgumentValue: Argument {
      - Parameter required: Whether or not the argument is required to be set
     */
     init(_ mainName: String, alternateNames: [String]?, `default`: ArgType?, description: String?, `required`: Bool, parser: inout ArgumentParser) throws
-    /// Sets the argument's value, it's default value if that is nil, or throws an error if it's required but the value is nil
-    mutating func setValue(from: String) throws
 }
 
 struct ArgumentNameValidator: Validator {

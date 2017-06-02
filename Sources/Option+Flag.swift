@@ -12,7 +12,7 @@ import Foundation
 import Strings
 
 /// CLI Arguments that come with a value
-public struct Option<A: ArgumentType>: ArgumentValue {
+public class Option<A: ArgumentType>: ArgumentValue {
     typealias ArgType = A
     public var mainName: String
     public var alternateNames: [String]?
@@ -26,7 +26,7 @@ public struct Option<A: ArgumentType>: ArgumentValue {
     public var usageDescriptionActualLength: Int = 0
     public var usageDescriptionNiceLength: Int = 0
 
-    public init(_ mainName: String, alternateNames: [String]? = nil, `default`: A? = nil, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
+    public required init(_ mainName: String, alternateNames: [String]? = nil, `default`: A? = nil, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
         let reserved = ["h", "help", "v", "version"]
         let mainName = mainName.lowercased().lstrip("-")
         let alternateNames = alternateNames?.map { $0.lowercased().lstrip("-") }
@@ -64,7 +64,7 @@ public struct Option<A: ArgumentType>: ArgumentValue {
         parser.arguments.append(self)
     }
 
-    public mutating func usage() -> String {
+    public func usage() -> String {
         var u = "\t-"
         if mainName.length > 1 {
             u += "-"
@@ -99,11 +99,11 @@ public struct Option<A: ArgumentType>: ArgumentValue {
         return u
     }
 
-    public mutating func parse() throws {
+    public func parse(_ cli: inout [String]) throws {
         // Try and get the string value of the argument from the cli
-        if let stringValue = ArgumentParser.parse(self) {
+        if let stringValue = ArgumentParser.parse(&cli, for: self) {
             // Try and convert that string value to the proper type
-            try setValue(from: stringValue)
+            self.value = try A.from(string: stringValue)
         }
 
         if self.value == nil {
@@ -115,23 +115,6 @@ public struct Option<A: ArgumentType>: ArgumentValue {
                 throw ArgumentError.requiredArgumentNotSet(mainName)
             }
         }
-    }
-
-    mutating func setValue(from: String) throws {
-        // Try and convert the string value to the expected type, or use the default value
-        do {
-            self.value = try A.from(string: from)
-            return
-        } catch {
-            // If no value and it's required, throw an error
-            if let value = `default` {
-                self.value = value
-                return
-            } else if `required` {
-                throw ArgumentError.requiredArgumentNotSet(mainName)
-            }
-        }
-        self.value = nil
     }
 }
 
