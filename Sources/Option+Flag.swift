@@ -106,16 +106,15 @@ public struct Option<A: ArgumentType>: ArgumentValue {
             try setValue(from: stringValue)
         }
 
-        // No string value specified in the cli, so try and return the default value
-        if let value = `default` {
-            self.value = value
-        // If the value is required and has no default value, throw an error
-        } else if `required` {
-            throw ArgumentError.requiredArgumentNotSet(mainName)
+        if self.value == nil {
+            // No string value specified in the cli, so try and return the default value
+            if let v = `default` {
+                self.value = v
+            // If the value is required and has no default value, throw an error
+            } else if `required` {
+                throw ArgumentError.requiredArgumentNotSet(mainName)
+            }
         }
-
-        // No value specified in the cli, no default value, not required, so set value to nil
-        self.value = nil
     }
 
     mutating func setValue(from: String) throws {
