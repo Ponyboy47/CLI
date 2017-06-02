@@ -70,7 +70,7 @@ public struct ArgumentParser {
     }
 
     /// Parse for a specific Argument and returns it's string value if it finds one
-    public static func parse<A: ArgumentValue>(_ argument: A) -> String? {
+    static func parse<A: ArgumentValue>(_ argument: A) -> String? {
         let isBool = argument.type is Bool.Type
         if argument.mainName.length > 1 {
             if let value = ArgumentParser.parse(longName: argument.mainName, isBool: isBool) {
