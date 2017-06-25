@@ -41,9 +41,12 @@ public class ArgumentParser {
         do {
             if let help = ArgumentParser.parse(&cliArguments, for: "help", isBool: true) {
                 h = try Bool.from(string: help)
-            } else if let help = ArgumentParser.parse(&cliArguments, for: "h", isBool: true) {
+            }
+            guard !h else { return h }
+            if let help = ArgumentParser.parse(&cliArguments, for: "h", isBool: true) {
                 h = try Bool.from(string: help)
             }
+            guard !h else { return h }
         } catch {
             print("An error occured determing if the help/usage text needed to be displayed.\n\t\(error)")
         }
@@ -55,9 +58,12 @@ public class ArgumentParser {
         do {
             if let version = ArgumentParser.parse(&cliArguments, for: "version", isBool: true) {
                 v = try Bool.from(string: version)
-            } else if let version = ArgumentParser.parse(&cliArguments, for: "v", isBool: true) {
+            }
+            guard !v else { return v }
+            if let version = ArgumentParser.parse(&cliArguments, for: "v", isBool: true) {
                 v = try Bool.from(string: version)
             }
+            guard !v else { return v }
         } catch {
             print("An error occured determing if the version needed to be displayed.\n\t\(error)")
         }
