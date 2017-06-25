@@ -39,35 +39,24 @@ public class ArgumentParser {
     public var needsHelp: Bool {
         var h: Bool = false
         do {
-            if let help = ArgumentParser.parse(&cliArguments, for: "help", isBool: true) {
-                h = try Bool.from(string: help)
+            if let help = ArgumentParser.parse(&cliArguments, for: ["h", "help"], isBool: true) {
+                return try Bool.from(string: help)
             }
-            guard !h else { return h }
-            if let help = ArgumentParser.parse(&cliArguments, for: "h", isBool: true) {
-                h = try Bool.from(string: help)
-            }
-            guard !h else { return h }
         } catch {
             print("An error occured determing if the help/usage text needed to be displayed.\n\t\(error)")
         }
-        return h
+        return false
     }
 
     public var wantsVersion: Bool {
-        var v: Bool = false
         do {
-            if let version = ArgumentParser.parse(&cliArguments, for: "version", isBool: true) {
-                v = try Bool.from(string: version)
+            if let version = ArgumentParser.parse(&cliArguments, for: ["v", "version"], isBool: true) {
+                return try Bool.from(string: version)
             }
-            guard !v else { return v }
-            if let version = ArgumentParser.parse(&cliArguments, for: "v", isBool: true) {
-                v = try Bool.from(string: version)
-            }
-            guard !v else { return v }
         } catch {
             print("An error occured determing if the version needed to be displayed.\n\t\(error)")
         }
-        return v
+        return false
     }
 
     /// Parse all the arguments and set their values
@@ -115,7 +104,7 @@ public class ArgumentParser {
     }
 
     /// Parse for a specific shortName argument
-    private static func parse(_ cli: inout [String], for shortName: Character, isBool: Bool) -> String? {
+    private static func parse(_ cli: inout [String], for shortName: Character, isBool: Bool = false) -> String? {
         // Go over all the single character arguments (preceded by a single hyphen)
         for arg in cli.filter({ $0.starts(with: "-") && !$0.starts(with: "--") }) {
             // Get rid of the hyphen and return the remaining characters
