@@ -37,7 +37,6 @@ public class ArgumentParser {
     }
 
     public var needsHelp: Bool {
-        var h: Bool = false
         do {
             if let help = ArgumentParser.parse(&cliArguments, for: ["h", "help"], isBool: true) {
                 return try Bool.from(string: help)
