@@ -18,7 +18,7 @@ public protocol ArgumentType {
 }
 
 public struct ArgArray<Element: ArgumentType>: ArgumentType {
-    let values: [Element]
+    public let values: [Element]
     init(_ array: [Element]) {
         self.values = array
     }
