@@ -17,6 +17,12 @@ public protocol ArgumentType {
     static func from(string value: String) throws -> Self
 }
 
+public extension Array where Element: ArgumentType {
+    static func from(string value: String) throws -> Array<Element> {
+        return try value.components(separatedBy: ",").map({ try Element.from(string: $0.strip()) })
+    }
+}
+
 protocol Argument {
     /// The main identifier for the cli argument
     var mainName: String { get set }
