@@ -17,9 +17,13 @@ public protocol ArgumentType {
     static func from(string value: String) throws -> Self
 }
 
-public extension Array where Element: ArgumentType {
-    static func from(string value: String) throws -> Array<Element> {
-        return try value.components(separatedBy: ",").map({ try Element.from(string: $0.strip()) })
+public struct ArgArray<Element: ArgumentType>: ArgumentType {
+    let values: [Element]
+    init(_ array: [Element]) {
+        self.values = array
+    }
+    public static func from(string value: String) throws -> ArgArray<Element> {
+        return ArgArray<Element>(try value.components(separatedBy: ",").map({ try Element.from(string: $0.strip()) }))
     }
 }
 
