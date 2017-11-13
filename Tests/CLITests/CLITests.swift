@@ -6,7 +6,7 @@ class CLITests: XCTestCase {
 
 #if os(Linux)
 extension CLITests {
-    static var allTests = [
+    static var allTests: [(String, (XCTestCase) -> () -> Void)] = [
     ]
 }
 #endif

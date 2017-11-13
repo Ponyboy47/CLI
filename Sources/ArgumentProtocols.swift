@@ -69,7 +69,7 @@ protocol ArgumentValue: Argument {
 
 struct ArgumentNameValidator: Validator {
     public static func validate(_ value: Validatable) -> Bool {
-        guard let str = value as? String, str.length > 0 else { return false }
+        guard let str = value as? String, str.count > 0 else { return false }
         var allowed = CharacterSet.alphanumerics
         allowed.insert(charactersIn: "_-")
         guard CharacterSet.lowercaseLetters.contains(str.characters.first!.unicodeScalar) else { return false }

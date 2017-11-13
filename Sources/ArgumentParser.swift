@@ -135,7 +135,7 @@ public class ArgumentParser {
     private static func parse(_ cli: inout [String], for argumentNames: [String], isBool: Bool = false) -> String? {
         var value: String?
         for argumentName in argumentNames {
-            if argumentName.length == 1 {
+            if argumentName.count == 1 {
                 value = ArgumentParser.parse(&cli, for: argumentName.characters.first!, isBool: isBool)
             } else {
                 value = ArgumentParser.parse(&cli, for: argumentName, isBool: isBool)

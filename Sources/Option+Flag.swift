@@ -66,7 +66,7 @@ public class Option<A: ArgumentType>: ArgumentValue {
 
     public func usage() -> String {
         var u = "\t-"
-        if mainName.length > 1 {
+        if mainName.count > 1 {
             u += "-"
         }
         u += mainName
@@ -74,15 +74,15 @@ public class Option<A: ArgumentType>: ArgumentValue {
         if let alternates = alternateNames {
             for alt in alternates {
                 u += ", -"
-                if alt.length > 1 {
+                if alt.count > 1 {
                     u += "-"
                 }
                 u += alt
             }
         }
-        usageDescriptionActualLength = u.length
+        usageDescriptionActualLength = u.count
 
-        while u.length < usageDescriptionNiceLength {
+        while u.count < usageDescriptionNiceLength {
             u += " "
         }
 
