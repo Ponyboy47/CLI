@@ -1,8 +1,20 @@
-// swift-tools-version:3.1
+// swift-tools-version:4.0
 
 import PackageDescription
 
 let package = Package(
     name: "CLI",
-    dependencies: [.Package(url: "https://github.com/Ponyboy47/Strings.git", majorVersion: 2)]
+    products: [
+        .library(
+            name: "CLI",
+            targets: ["CLI"]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/Ponyboy47/Strings.git", .upToNextMajor(from: "2.0.0"))
+    ],
+    targets: [
+        .target(
+            name: "CLI",
+            dependencies: ["Strings"]),
+    ]
 )
