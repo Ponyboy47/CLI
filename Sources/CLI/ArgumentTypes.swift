@@ -11,7 +11,7 @@ Description:    Extensions for cli argument types
 /// Allows Bools to be used as cli arguments
 extension Bool: ArgumentType {
     public static func from(string value: String) throws -> Bool {
-        guard value.characters.count > 0 else {
+        guard value.count > 0 else {
             throw ArgumentError.emptyString
         }
         if value == "1" {
@@ -29,7 +29,7 @@ extension Bool: ArgumentType {
 /// Allows Ints to be used as cli arguments
 extension Int: ArgumentType {
     public static func from(string value: String) throws -> Int {
-        guard value.characters.count > 0 else {
+        guard value.count > 0 else {
             throw ArgumentError.emptyString
         }
         guard let val = Int(value) else {
@@ -43,7 +43,7 @@ extension Int: ArgumentType {
 /// Allows Doubles to be used as cli arguments
 extension Double: ArgumentType {
     public static func from(string value: String) throws -> Double {
-        guard value.characters.count > 0 else {
+        guard value.count > 0 else {
             throw ArgumentError.emptyString
         }
         guard let val = Double(value) else {
@@ -57,7 +57,7 @@ extension Double: ArgumentType {
 /// Allows Strings to be used as cli arguments
 extension String: ArgumentType {
     public static func from(string value: String) throws -> String {
-        guard value.characters.count > 0 else {
+        guard value.count > 0 else {
             throw ArgumentError.emptyString
         }
         return value

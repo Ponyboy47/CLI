@@ -15,10 +15,10 @@ public class ArgumentParser {
     var cliArguments: [String]
 
     public lazy var shortNames: [String] = {
-        return self.allNames.filter { $0.characters.count == 1 }
+        return self.allNames.filter { $0.count == 1 }
     }()
     public lazy var longNames: [String] = {
-        return self.allNames.filter { $0.characters.count > 1 }
+        return self.allNames.filter { $0.count > 1 }
     }()
     public lazy var allNames: [String] = {
         var aNames: [String] = []
@@ -107,7 +107,7 @@ public class ArgumentParser {
         // Go over all the single character arguments (preceded by a single hyphen)
         for arg in cli.filter({ $0.starts(with: "-") && !$0.starts(with: "--") }) {
             // Get rid of the hyphen and return the remaining characters
-            let argChars = arg.dropFirst().characters
+            let argChars = arg.dropFirst()
             // Look for the argument in the array, else return nil
             guard let _ = argChars.index(of: shortName) else { continue }
             // Make sure it's not a bool, or else just return true
@@ -136,7 +136,7 @@ public class ArgumentParser {
         var value: String?
         for argumentName in argumentNames {
             if argumentName.count == 1 {
-                value = ArgumentParser.parse(&cli, for: argumentName.characters.first!, isBool: isBool)
+                value = ArgumentParser.parse(&cli, for: argumentName.first!, isBool: isBool)
             } else {
                 value = ArgumentParser.parse(&cli, for: argumentName, isBool: isBool)
             }

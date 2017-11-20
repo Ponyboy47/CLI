@@ -72,8 +72,8 @@ struct ArgumentNameValidator: Validator {
         guard let str = value as? String, str.count > 0 else { return false }
         var allowed = CharacterSet.alphanumerics
         allowed.insert(charactersIn: "_-")
-        guard CharacterSet.lowercaseLetters.contains(str.characters.first!.unicodeScalar) else { return false }
-        for char in str.characters {
+        guard CharacterSet.lowercaseLetters.contains(str.first!.unicodeScalar) else { return false }
+        for char in str {
             if !allowed.contains(char.unicodeScalar) {
                 return false
             }
