@@ -10,9 +10,9 @@ Description:    The parser class that reads the cli for data
 
 /// Parses the CLI for Arguments
 public final class ArgumentParser {
-    var usage: String
-    var arguments: [Argument] = []
-    var cliArguments: [String]
+    public var usage: String
+    public var arguments: [Argument] = []
+    public var cliArguments: [String]
     var helpArgument: Flag! = try? Flag("h", "help", description: "Display usage information")
     var versionArgument: Flag! = try? Flag("v", "version", description: "Displays the current version")
     private var hasParsed = false

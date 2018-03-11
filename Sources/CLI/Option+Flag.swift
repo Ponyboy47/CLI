@@ -18,15 +18,27 @@ public final class Option<A: ArgumentType>: ArgumentValue {
     public lazy var sortedNames: [String] = {
         return self.names.sorted(by: { return $0.count < $1.count })
     }()
-    public internal(set) var description: String?
+    public internal(set) var _description: String?
     public internal(set) var `required`: Bool
     public var type: A.Type {
         return A.self
     }
     public internal(set) var `default`: A?
-    public internal(set) var value: A? = nil
+    private var _value: A?
+    public var value: A? {
+        get {
+            return _value ?? `default`
+        }
+        set {
+            _value = newValue
+        }
+    }
     public internal(set) var usageDescriptionActualLength: Int = 0
     public internal(set) var usageDescriptionNiceLength: Int = 0
+
+    public var description: String {
+        return "\(self.sortedNames) = \(self.value)"
+    }
 
     public convenience init(_ names: String..., `default`: A? = nil, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
         try self.init(names, default: `default`, description: description, required: `required`)
@@ -59,7 +71,7 @@ public final class Option<A: ArgumentType>: ArgumentValue {
 
         self.names = names
         self.default = `default`
-        self.description = description
+        self._description = description
         self.`required` = `required`
     }
 
@@ -88,7 +100,7 @@ public final class Option<A: ArgumentType>: ArgumentValue {
             u += " "
         }
 
-        if let d = description {
+        if let d = _description {
             u += ": \(d)"
         }
         if let d = `default` {

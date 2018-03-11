@@ -6,7 +6,7 @@ A swift framework for parsing command line arguments into values
 ## Installation (SPM)
 Include the following in your Package.swift file
 ```swift
-.package(url: "https://github.com/Ponyboy47/CLI.git", .upToNextMajor(from: "1.0.0"))
+.package(url: "https://github.com/Ponyboy47/CLI.git", .upToNextMinor(from: "2.1.0"))
 ```
 For swift 3 use version 1.x
 
@@ -16,19 +16,16 @@ For swift 3 use version 1.x
 ```swift
 import CLI
 
-// The CLI module can't get the CommandLine arguments itself (well it can call `CommandLine.arguments` but it will be empty for some reason)
-var arguments = CommandLine.arguments
-
 // Remove the first item in the array since it's just the path to the executable
-var argParser = ArgumentParser("\(arguments.remove(at: 0)) [Options]", cliArguments: arguments)
+var argParser = ArgumentParser.default
 
-let arg1 = Option<Int>("i", alternateNames: ["int", "integer"], description: "An integer argument", parser: &argParser)
-let arg2 = Flag("b", alternateNames: ["bool", "boolean"], description: "A boolean argument", parser: &argParser)
-let arg3 = Option<String>("n", alternateNames: ["name"], required: true, description: "A string argument that must have a value", parser: &argParser)
+let arg1 = Option<Int>("i", "int", "integer", description: "An integer argument", parser: &argParser)
+let arg2 = Flag("b", "bool", "boolean", description: "A boolean argument", parser: &argParser)
+let arg3 = Option<String>("n", "name", required: true, description: "A string argument that must have a value", parser: &argParser)
 let arg4 = Option<Double>("d", default: 12.34, description: "A double argument with a default value", parser: &argParser)
 
 // Sets the values of the arguments, will throw an error if required arguments are not set
-try argParser.parse()
+try argParser.parseAll()
 
 // Get argument values like this
 if let i = arg1.value {

@@ -27,11 +27,11 @@ public struct ArgArray<Element: ArgumentType>: ArgumentType {
     }
 }
 
-public protocol Argument {
+public protocol Argument: CustomStringConvertible {
     /// The identifiers for the cli argument
     var names: Set<String> { get }
     /// The description of the cli argument
-    var description: String? { get }
+    var _description: String? { get }
     var usageDescriptionActualLength: Int { get }
     var usageDescriptionNiceLength: Int { get }
     /// The usage string for cli argument
