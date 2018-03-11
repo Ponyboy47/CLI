@@ -27,15 +27,13 @@ public struct ArgArray<Element: ArgumentType>: ArgumentType {
     }
 }
 
-protocol Argument {
-    /// The main identifier for the cli argument
-    var mainName: String { get set }
-    /// The alternate identifiers for the cli argument
-    var alternateNames: [String]? { get set }
+public protocol Argument {
+    /// The identifiers for the cli argument
+    var names: Set<String> { get }
     /// The description of the cli argument
-    var description: String? { get set }
-    var usageDescriptionActualLength: Int { get set }
-    var usageDescriptionNiceLength: Int { get set }
+    var description: String? { get }
+    var usageDescriptionActualLength: Int { get }
+    var usageDescriptionNiceLength: Int { get }
     /// The usage string for cli argument
     mutating func usage() -> String
     /// Parses the cli arguments to get the string value of the argument, or nil if it is not set
@@ -44,27 +42,36 @@ protocol Argument {
 
 
 /// Protocol for CLI argument types
-protocol ArgumentValue: Argument {
+public protocol ArgumentValue: Argument {
     associatedtype ArgType: ArgumentType
-    /// The default value for the cli argument
-    var `default`: ArgType? { get set }
     /// Whether or not the argument is required to be set
-    var `required`: Bool { get set }
+    var `required`: Bool { get }
     /// The type of the argument value
     var type: ArgType.Type { get }
+    /// The default value of the argument 
+    var `default`: ArgType? { get }
     /// The value of the argument after parsing the command line input
-    var value: ArgType? { get set }
+    var value: ArgType? { get }
 
     /**
      Initializer
 
-     - Parameter shortName: The single character identifier for the cli argument
-     - Parameter longName: The long identifier for the cli argument
+     - Parameter names: A list of cli arg names that trigger the argument
      - Parameter default: The default value for the cli argument
      - Parameter description: The usage description for the cli argument
      - Parameter required: Whether or not the argument is required to be set
     */
-    init(_ mainName: String, alternateNames: [String]?, `default`: ArgType?, description: String?, `required`: Bool, parser: inout ArgumentParser) throws
+    init(_ names: [String], `default`: ArgType?, description: String?, `required`: Bool, parser: inout ArgumentParser) throws
+
+    /**
+     Initializer
+
+     - Parameter names: A list of cli arg names that trigger the argument
+     - Parameter default: The default value for the cli argument
+     - Parameter description: The usage description for the cli argument
+     - Parameter required: Whether or not the argument is required to be set
+    */
+    init(_ names: [String], `default`: ArgType?, description: String?, `required`: Bool) throws
 }
 
 struct ArgumentNameValidator: Validator {

@@ -14,4 +14,6 @@ public enum ArgumentError: Error {
     case emptyString
     case requiredArgumentNotSet(String)
     case invalidName(String)
+    case invalidArgument(String)
+    case missingName
 }

@@ -12,73 +12,75 @@ import Foundation
 import Strings
 
 /// CLI Arguments that come with a value
-public class Option<A: ArgumentType>: ArgumentValue {
-    typealias ArgType = A
-    public var mainName: String
-    public var alternateNames: [String]?
-    public var `default`: A?
-    public var description: String?
-    public var `required`: Bool
+public final class Option<A: ArgumentType>: ArgumentValue {
+    public typealias ArgType = A
+    public internal(set) var names: Set<String>
+    public lazy var sortedNames: [String] = {
+        return self.names.sorted(by: { return $0.count < $1.count })
+    }()
+    public internal(set) var description: String?
+    public internal(set) var `required`: Bool
     public var type: A.Type {
         return A.self
     }
-    public var value: A?
-    public var usageDescriptionActualLength: Int = 0
-    public var usageDescriptionNiceLength: Int = 0
+    public internal(set) var `default`: A?
+    public internal(set) var value: A? = nil
+    public internal(set) var usageDescriptionActualLength: Int = 0
+    public internal(set) var usageDescriptionNiceLength: Int = 0
 
-    public required init(_ mainName: String, alternateNames: [String]? = nil, `default`: A? = nil, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
-        let reserved = ["h", "help", "v", "version"]
-        let mainName = mainName.lowercased().lstrip("-")
-        let alternateNames = alternateNames?.map { $0.lowercased().lstrip("-") }
-        let allNames = parser.allNames
+    public convenience init(_ names: String..., `default`: A? = nil, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
+        try self.init(names, default: `default`, description: description, required: `required`)
 
-        guard mainName.validate(ArgumentNameValidator.self) else {
-            throw ArgumentError.invalidName("Cannot use '\(mainName)' as a name since it contains invalid characters.")
+        try parser.addArgument(self)
+    }
+
+    public convenience init(_ names: [String], `default`: A? = nil, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
+        try self.init(names, default: `default`, description: description, required: `required`)
+
+        try parser.addArgument(self)
+    }
+
+    public convenience init(_ names: String..., `default`: A? = nil, description: String? = nil, `required`: Bool = false) throws {
+        try self.init(names, default: `default`, description: description, required: `required`)
+    }
+
+    public init(_ names: [String], `default`: A? = nil, description: String? = nil, `required`: Bool = false) throws {
+        guard !names.isEmpty else {
+            throw ArgumentError.missingName
         }
-        guard !reserved.contains(mainName) else {
-            throw ArgumentError.invalidName("Cannot use '\(mainName)' as a name since it is reserved for some base functionality.")
-        }
-        guard !allNames.contains(mainName) else {
-            throw ArgumentError.invalidName("Cannot use '\(mainName)' as a name since it is already used by a different argument")
-        }
-        if let alternates = alternateNames {
-            for alt in alternates {
-                guard alt.validate(ArgumentNameValidator.self) else {
-                    throw ArgumentError.invalidName("Cannot use '\(alt)' as a name since it contains invalid characters.")
-                }
-                guard !reserved.contains(alt) else {
-                    throw ArgumentError.invalidName("Cannot use '\(alt)' as a name since it is reserved for some base functionality.")
-                }
-                guard !allNames.contains(alt) else {
-                    throw ArgumentError.invalidName("Cannot use '\(alt)' as a name since it is already used by a different argument")
-                }
+
+        let names = Set(names.map { $0.lowercased().lstrip("-") })
+
+        for name in names {
+            guard name.validate(ArgumentNameValidator.self) else {
+                throw ArgumentError.invalidName("Cannot use '\(name)' as a name since it contains invalid characters.")
             }
         }
 
-        self.mainName = mainName
-        self.alternateNames = alternateNames
-        self.`default` = `default`
+        self.names = names
+        self.default = `default`
         self.description = description
         self.`required` = `required`
+    }
 
-        parser.arguments.append(self)
+    @available(*, unavailable, message: "Use init(_ names: String...) instead")
+    public init(_ mainName: String, alternateNames: [String]? = nil, `default`: A? = nil, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
+        fatalError("Use the init(_ names: String...) initializer instead")
     }
 
     public func usage() -> String {
         var u = "\t-"
-        if mainName.count > 1 {
+        if sortedNames.first!.count > 1 {
             u += "-"
         }
-        u += mainName
+        u += sortedNames.first!
 
-        if let alternates = alternateNames {
-            for alt in alternates {
-                u += ", -"
-                if alt.count > 1 {
-                    u += "-"
-                }
-                u += alt
+        for alt in sortedNames.dropFirst() {
+            u += ", -"
+            if alt.count > 1 {
+                u += "-"
             }
+            u += alt
         }
         usageDescriptionActualLength = u.count
 
@@ -100,21 +102,17 @@ public class Option<A: ArgumentType>: ArgumentValue {
     }
 
     public func parse(_ cli: inout [String]) throws {
-        // Try and get the string value of the argument from the cli
-        if let stringValue = ArgumentParser.parse(&cli, for: self) {
-            // Try and convert that string value to the proper type
-            self.value = try A.from(string: stringValue)
+        guard type is Bool.Type else {
+            value = try A.from(string: cli.remove(at: 0))
+            return
         }
 
-        if self.value == nil {
-            // No string value specified in the cli, so try and return the default value
-            if let v = `default` {
-                self.value = v
-            // If the value is required and has no default value, throw an error
-            } else if `required` {
-                throw ArgumentError.requiredArgumentNotSet(mainName)
-            }
+        guard let d = `default` else {
+            value = try A.from(string: String(true))
+            return
         }
+
+        value = try A.from(string: String(!(d as! Bool)))
     }
 }
 

@@ -9,142 +9,142 @@ Description:    The parser class that reads the cli for data
 */
 
 /// Parses the CLI for Arguments
-public class ArgumentParser {
+public final class ArgumentParser {
     var usage: String
     var arguments: [Argument] = []
     var cliArguments: [String]
+    var helpArgument: Flag! = try? Flag("h", "help", description: "Display usage information")
+    var versionArgument: Flag! = try? Flag("v", "version", description: "Displays the current version")
+    private var hasParsed = false
 
-    public lazy var shortNames: [String] = {
+    public static var `default`: ArgumentParser = {
+        return ArgumentParser()
+    }()
+
+    public lazy var shortNames: Set<String> = {
         return self.allNames.filter { $0.count == 1 }
     }()
-    public lazy var longNames: [String] = {
+    public lazy var longNames: Set<String> = {
         return self.allNames.filter { $0.count > 1 }
     }()
-    public lazy var allNames: [String] = {
-        var aNames: [String] = []
-        for arg in self.arguments {
-            aNames.append(arg.mainName)
-            if let alts = arg.alternateNames {
-                aNames += alts
-            }
-        }
-        return aNames
+    public lazy var allNames: Set<String> = {
+        return Set(self.arguments.reduce([]) { value, arg in
+            return value + arg.names
+        })
     }()
+
+    public convenience init() {
+        var arguments = CommandLine.arguments
+        self.init("\(arguments.remove(at: 0)) [Options]", cliArguments: arguments)
+    }
 
     public init(_ usage: String, cliArguments: [String]) {
         self.usage = usage
         self.cliArguments = cliArguments
+
+        do {
+            try self.addArgument(self.helpArgument)
+            try self.addArgument(self.versionArgument)
+        } catch {
+            print("An unexpected error occurred:")
+            print(error)
+        }
     }
 
     public var needsHelp: Bool {
-        do {
-            if let help = ArgumentParser.parse(&cliArguments, for: ["h", "help"], isBool: true) {
-                return try Bool.from(string: help)
+        if !hasParsed {
+            do {
+                try parseAll()
+            } catch {
+                print(error)
+                return false
             }
-        } catch {
-            print("An error occured determing if the help/usage text needed to be displayed.\n\t\(error)")
         }
-        return false
+        return self.helpArgument.value ?? false
     }
 
     public var wantsVersion: Bool {
-        do {
-            if let version = ArgumentParser.parse(&cliArguments, for: ["v", "version"], isBool: true) {
-                return try Bool.from(string: version)
+        if !hasParsed {
+            do {
+                try parseAll()
+            } catch {
+                print(error)
+                return false
             }
-        } catch {
-            print("An error occured determing if the version needed to be displayed.\n\t\(error)")
         }
-        return false
+        return self.versionArgument.value ?? false
+    }
+
+    public func addArgument(_ argument: Argument) throws {
+        let inUse = self.allNames.intersection(argument.names)
+        guard inUse.isEmpty else {
+            throw ArgumentError.invalidName("Cannot use '\(Array(inUse))' as names since they are already used by a different argument")
+        }
+        self.arguments.append(argument)
     }
 
     /// Parse all the arguments and set their values
+    @available(*, unavailable, renamed: "parseAll()")
     public func parse() throws {
-        for var arg in arguments {
-            try arg.parse(&cliArguments)
-        }
+        fatalError("parse() has been renamed to parseAll()")
     }
 
-    /// Parse for a specific Argument and returns it's string value if it finds one
-    static func parse<A: ArgumentValue>(_ cli: inout [String], for argument: A) -> String? {
-        let isBool = argument.type is Bool.Type
-        var names: [String] = [argument.mainName]
-        if let alternates = argument.alternateNames {
-            names += alternates
-        }
-        if let value = ArgumentParser.parse(&cli, for: names, isBool: isBool) {
-            // If the value is a bool or the argument has no default value,
-            //   then just return what we got
-            guard isBool, let d = argument.`default` else { return value }
-
-            // Otherwise return the opposite boolean of the default value
-            return String(!(d as! Bool))
-        }
-
-        // If we didn't find the cli argument, return nil
-        return nil
-    }
-
-    /// Parse for a specific longName argument
-    private static func parse(_ cli: inout [String], for longName: String, isBool: Bool = false) -> String? {
-        // Try and find the index of the long argument
-        if let index = cli.index(of: "--\(longName)"), index >= 0 {
-            // If the argument we're looking for is a Bool, go ahead and return true
-            guard !isBool else { return String(true) }
-            // So try and get the string value of the next argument, then return it
-            if let index = cli.index(of: "--\(longName)"), cli.count <= index + 1 {
-                let next = cli[index + 1]
-                return next
+    /// Parse all the arguments and set their values
+    public func parseAll() throws {
+        var unknown: [String] = []
+        while !cliArguments.isEmpty {
+            if let notFound = try parseNext() {
+                unknown.append(notFound)
             }
-            // Otherwise, return nil
-            return nil
         }
+
+        if !unknown.isEmpty {
+            print("\(unknown.count) unknown arguments:")
+            print("\(unknown)")
+        }
+        hasParsed = true
+    }
+
+    private func parseNext() throws -> String? {
+        var next: String! = cliArguments.remove(at: 0)
+
+        guard next.hasPrefix("-") else {
+            throw ArgumentError.invalidArgument(next)
+        }
+
+        if next.hasPrefix("--") {
+            next = String(next.dropFirst(2))
+
+            if var argument = arguments.first(where: { arg in
+                return arg.names.contains(next)
+            }) {
+                try argument.parse(&cliArguments)
+            } else { return "--\(next!)" }
+        } else {
+            next = String(next.dropFirst())
+
+            var unknown = ""
+            for char in next {
+                if var argument = arguments.first(where: { arg in
+                    return arg.names.contains("\(char)")
+                }) {
+                    try argument.parse(&cliArguments)
+                } else { unknown += String(char) }
+            }
+            guard unknown.isEmpty else { return "-\(unknown)" }
+        }
+
         return nil
     }
 
-    /// Parse for a specific shortName argument
+    @available(*, unavailable)
     private static func parse(_ cli: inout [String], for shortName: Character, isBool: Bool = false) -> String? {
-        // Go over all the single character arguments (preceded by a single hyphen)
-        for arg in cli.filter({ $0.starts(with: "-") && !$0.starts(with: "--") }) {
-            // Get rid of the hyphen and return the remaining characters
-            let argChars = arg.dropFirst()
-            // Look for the argument in the array, else return nil
-            guard let _ = argChars.index(of: shortName) else { continue }
-            // Make sure it's not a bool, or else just return true
-            guard !isBool else { return String(true) }
-            // Get the index from the array of all args or return nil (this shouldn't ever happen)
-            guard let index = cli.index(of: arg) else { return nil }
-            // Verify the next index is within the array of cli arguments
-            guard cli.count >= index + 1 else { return nil }
-            // Now that we've gotten an argument, remove it from the array of cli arguments
-            cli.remove(at: index)
-            // If it was a single character argument but there were multiple
-            // args together (ie: -abc), we need to put the other args back
-            // into the array
-            if argChars.count > 1 {
-                cli.insert(arg.replacingOccurrences(of: String(shortName), with: ""), at: index)
-            }
-
-            // Remove and return the argument's value as well
-            return cli.remove(at: index)
-        }
-        // Returns nil only when there were no arguments
-        return nil
+        fatalError("ArgumentParser.parse() has been removed")
     }
 
+    @available(*, unavailable)
     private static func parse(_ cli: inout [String], for argumentNames: [String], isBool: Bool = false) -> String? {
-        var value: String?
-        for argumentName in argumentNames {
-            if argumentName.count == 1 {
-                value = ArgumentParser.parse(&cli, for: argumentName.first!, isBool: isBool)
-            } else {
-                value = ArgumentParser.parse(&cli, for: argumentName, isBool: isBool)
-            }
-            if value != nil {
-                return value
-            }
-        }
-        return nil
+        fatalError("ArgumentParser.parse() has been removed")
     }
 
     /// Prints the usage text for all of the arguments included in the parser
