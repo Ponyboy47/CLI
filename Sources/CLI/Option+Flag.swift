@@ -37,7 +37,7 @@ public final class Option<A: ArgumentType>: ArgumentValue {
     public internal(set) var usageDescriptionNiceLength: Int = 0
 
     public var description: String {
-        return "\(self.sortedNames) = \(self.value)"
+        return "\(self.sortedNames) = \(String(describing: self.value))"
     }
 
     public convenience init(_ names: String..., `default`: A? = nil, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
