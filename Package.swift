@@ -10,7 +10,7 @@ let package = Package(
             targets: ["CLI"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/Ponyboy47/Strings.git", .upToNextMajor(from: "2.0.0"))
+        .package(url: "https://github.com/Ponyboy47/Strings.git", .upToNextMajor(from: "2.2.0"))
     ],
     targets: [
         .target(
