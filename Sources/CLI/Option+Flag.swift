@@ -12,7 +12,7 @@ import Foundation
 import Strings
 
 /// CLI Arguments that come with a value
-public final class Option<A: ArgumentType>: ArgumentValue {
+public class Option<A: ArgumentType>: ArgumentValueWithDefault {
     public typealias ArgType = A
     public internal(set) var names: Set<String>
     public lazy var sortedNames: [String] = {
@@ -40,23 +40,63 @@ public final class Option<A: ArgumentType>: ArgumentValue {
         return "\(self.sortedNames) = \(String(describing: self.value))"
     }
 
-    public convenience init(_ names: String..., `default`: A? = nil, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
+    public convenience init(_ names: String..., description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
+        try self.init(names, default: nil, description: description, required: `required`)
+
+        try parser.addArgument(self)
+    }
+
+    public required init(_ names: [String], description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
+        guard !names.isEmpty else {
+            throw ArgumentError.missingName
+        }
+
+        let names = Set(names.map { $0.lowercased().lstrip("-") })
+
+        for name in names {
+            guard name.validate(ArgumentNameValidator.self) else {
+                throw ArgumentError.invalidName("Cannot use '\(name)' as a name since it contains invalid characters.")
+            }
+        }
+
+        self.names = names
+        self.default = nil
+        self._description = description
+        self.`required` = `required`
+
+        try parser.addArgument(self)
+    }
+
+    public convenience init(_ names: String..., description: String? = nil, `required`: Bool = false) throws {
+        try self.init(names, default: nil, description: description, required: `required`)
+    }
+
+    public required init(_ names: [String], description: String? = nil, `required`: Bool = false) throws {
+        guard !names.isEmpty else {
+            throw ArgumentError.missingName
+        }
+
+        let names = Set(names.map { $0.lowercased().lstrip("-") })
+
+        for name in names {
+            guard name.validate(ArgumentNameValidator.self) else {
+                throw ArgumentError.invalidName("Cannot use '\(name)' as a name since it contains invalid characters.")
+            }
+        }
+
+        self.names = names
+        self.default = nil
+        self._description = description
+        self.`required` = `required`
+    }
+
+    public convenience init(_ names: String..., `default`: A?, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
         try self.init(names, default: `default`, description: description, required: `required`)
 
         try parser.addArgument(self)
     }
 
-    public convenience init(_ names: [String], `default`: A? = nil, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
-        try self.init(names, default: `default`, description: description, required: `required`)
-
-        try parser.addArgument(self)
-    }
-
-    public convenience init(_ names: String..., `default`: A? = nil, description: String? = nil, `required`: Bool = false) throws {
-        try self.init(names, default: `default`, description: description, required: `required`)
-    }
-
-    public init(_ names: [String], `default`: A? = nil, description: String? = nil, `required`: Bool = false) throws {
+    public required init(_ names: [String], `default`: A?, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
         guard !names.isEmpty else {
             throw ArgumentError.missingName
         }
@@ -73,11 +113,31 @@ public final class Option<A: ArgumentType>: ArgumentValue {
         self.default = `default`
         self._description = description
         self.`required` = `required`
+
+        try parser.addArgument(self)
     }
 
-    @available(*, unavailable, message: "Use init(_ names: String...) instead")
-    public init(_ mainName: String, alternateNames: [String]? = nil, `default`: A? = nil, description: String? = nil, `required`: Bool = false, parser: inout ArgumentParser) throws {
-        fatalError("Use the init(_ names: String...) initializer instead")
+    public convenience init(_ names: String..., `default`: A?, description: String? = nil, `required`: Bool = false) throws {
+        try self.init(names, default: `default`, description: description, required: `required`)
+    }
+
+    public required init(_ names: [String], `default`: A?, description: String? = nil, `required`: Bool = false) throws {
+        guard !names.isEmpty else {
+            throw ArgumentError.missingName
+        }
+
+        let names = Set(names.map { $0.lowercased().lstrip("-") })
+
+        for name in names {
+            guard name.validate(ArgumentNameValidator.self) else {
+                throw ArgumentError.invalidName("Cannot use '\(name)' as a name since it contains invalid characters.")
+            }
+        }
+
+        self.names = names
+        self.default = `default`
+        self._description = description
+        self.`required` = `required`
     }
 
     public func usage() -> String {

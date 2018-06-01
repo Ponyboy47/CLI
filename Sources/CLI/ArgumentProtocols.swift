@@ -48,10 +48,32 @@ public protocol ArgumentValue: Argument {
     var `required`: Bool { get }
     /// The type of the argument value
     var type: ArgType.Type { get }
-    /// The default value of the argument 
-    var `default`: ArgType? { get }
     /// The value of the argument after parsing the command line input
     var value: ArgType? { get }
+
+    /**
+     Initializer
+
+     - Parameter names: A list of cli arg names that trigger the argument
+     - Parameter description: The usage description for the cli argument
+     - Parameter required: Whether or not the argument is required to be set
+    */
+    init(_ names: [String], description: String?, `required`: Bool, parser: inout ArgumentParser) throws
+
+    /**
+     Initializer
+
+     - Parameter names: A list of cli arg names that trigger the argument
+     - Parameter description: The usage description for the cli argument
+     - Parameter required: Whether or not the argument is required to be set
+    */
+    init(_ names: [String], description: String?, `required`: Bool) throws
+}
+
+/// Protocol for CLI argument types that have default values
+public protocol ArgumentValueWithDefault: ArgumentValue {
+    /// The default value of the argument
+    var `default`: ArgType? { get }
 
     /**
      Initializer
