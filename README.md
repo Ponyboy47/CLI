@@ -23,6 +23,7 @@ let arg1 = Option<Int>("i", "int", "integer", description: "An integer argument"
 let arg2 = Flag("b", "bool", "boolean", description: "A boolean argument", parser: &argParser)
 let arg3 = Option<String>("n", "name", required: true, description: "A string argument that must have a value", parser: &argParser)
 let arg4 = Option<Double>("d", default: 12.34, description: "A double argument with a default value", parser: &argParser)
+let arg5 = MultiOption<Float>("f", description: "A float argument that can be specified multiple times", parser: &argParser)
 
 // Sets the values of the arguments, will throw an error if required arguments are not set
 try argParser.parseAll()
@@ -42,6 +43,10 @@ print("Got a string value from the cli: \(s)")
 
 if let d = arg4.value {
     print("Got a double value from the cli: \(d)")
+}
+
+for f in arg5 {
+    print("Got another value from cli: \(f)")
 }
 
 // You can make your own types available to be processed from the command line if you conform to the ArgumentType protocol
